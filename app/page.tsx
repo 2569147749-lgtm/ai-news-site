@@ -5,6 +5,7 @@ import { getShanghaiDate } from "@/lib/news-date";
 import { prioritizeNewsWithImages } from "@/lib/news-media";
 import { getNewsPage } from "@/lib/news-pagination";
 import { getHomepageHighlights } from "@/lib/news-search";
+import { newsContentClassName } from "@/lib/home-layout";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 600;
@@ -54,7 +55,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
         </form>
       </div>
 
-      <div className="mx-auto max-w-3xl">
+      <div className={newsContentClassName}>
         {items.length === 0 ? (
           <div className="border-y border-sand-edge py-12 text-center text-sm text-ink-sub">
             资讯正在同步，请稍后刷新。
