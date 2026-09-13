@@ -1,6 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { getTrendingNewsItems, searchNewsItems } from "../lib/news-search";
+import {
+  getHomepageHighlights,
+  getTrendingNewsItems,
+  searchNewsItems,
+} from "../lib/news-search";
 import type { NewsItem } from "../lib/types";
 
 function item(overrides: Partial<NewsItem>): NewsItem {
@@ -71,4 +75,42 @@ test("returns the twenty most timely and high-signal stories for an empty search
   assert.equal(trending.length, 20);
   assert.equal(trending[0].item.id, "new-model");
   assert.equal(trending.some((result) => result.item.id === "older"), false);
+});
+
+test("selects recent high-signal homepage highlights from distinct sources first", () => {
+  const highlights = getHomepageHighlights(
+    [
+      item({
+        id: "first-qbitai",
+        source: "量子位",
+        title: "新模型发布，智能体能力升级",
+        publishedAt: "2026-09-12T09:00:00.000Z",
+      }),
+      item({
+        id: "second-qbitai",
+        source: "量子位",
+        title: "大模型产品发布",
+        publishedAt: "2026-09-12T08:30:00.000Z",
+      }),
+      item({
+        id: "infoq",
+        source: "InfoQ",
+        title: "企业智能体正式上线",
+        publishedAt: "2026-09-12T08:00:00.000Z",
+      }),
+      item({
+        id: "36kr",
+        source: "36氪",
+        title: "AI 公司推出新产品",
+        publishedAt: "2026-09-12T07:30:00.000Z",
+      }),
+    ],
+    new Date("2026-09-12T10:00:00.000Z"),
+    3
+  );
+
+  assert.deepEqual(
+    highlights.map((result) => result.item.id),
+    ["first-qbitai", "infoq", "36kr"]
+  );
 });

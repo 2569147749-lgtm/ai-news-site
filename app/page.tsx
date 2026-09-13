@@ -1,8 +1,10 @@
 import NewsCard from "@/components/NewsCard";
 import NewsFeed from "@/components/NewsFeed";
+import TrendingRail from "@/components/TrendingRail";
 import { getNewsWithFallback } from "@/lib/data";
 import { getShanghaiDate } from "@/lib/news-date";
 import { getNewsPage } from "@/lib/news-pagination";
+import { getHomepageHighlights } from "@/lib/news-search";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 600;
@@ -23,6 +25,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   const visibleBatches = Number.isFinite(requestedPage)
     ? Math.max(1, Math.floor(requestedPage))
     : 1;
+  const trendingItems = getHomepageHighlights(items).map((result) => result.item);
   const featuredItems = items.slice(0, 3);
   const updates = getNewsPage(items.slice(3), 1, visibleBatches * 20);
 
@@ -70,6 +73,8 @@ export default async function HomePage({ searchParams }: HomePageProps) {
                 </div>
               </section>
             )}
+
+            <TrendingRail items={trendingItems} />
 
             <section className={featuredItems.length > 0 ? "mt-9" : ""}>
               <NewsFeed

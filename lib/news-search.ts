@@ -180,3 +180,32 @@ export function getTrendingNewsItems(
     )
     .slice(0, limit);
 }
+
+export function getHomepageHighlights(
+  items: NewsItem[],
+  now = new Date(),
+  limit = 5
+): SearchResult[] {
+  const trending = getTrendingNewsItems(items, now, items.length);
+  const highlights: SearchResult[] = [];
+  const selectedSources = new Set<string>();
+
+  for (const result of trending) {
+    if (selectedSources.has(result.item.source)) continue;
+
+    highlights.push(result);
+    selectedSources.add(result.item.source);
+    if (highlights.length === limit) return highlights;
+  }
+
+  for (const result of trending) {
+    if (highlights.some((highlight) => highlight.item.id === result.item.id)) {
+      continue;
+    }
+
+    highlights.push(result);
+    if (highlights.length === limit) break;
+  }
+
+  return highlights;
+}
