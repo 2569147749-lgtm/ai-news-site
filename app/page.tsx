@@ -61,13 +61,13 @@ export default async function HomePage({ searchParams }: HomePageProps) {
           </div>
         ) : (
           <section>
+            <TrendingRail items={trendingItems} />
             <NewsFeed
               initialItems={updates.items}
               initialPage={visibleBatches}
               initialHasMore={updates.hasMore}
               totalItems={items.length}
             />
-            <TrendingRail items={trendingItems} />
           </section>
         )}
       </div>
