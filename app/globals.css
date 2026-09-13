@@ -202,6 +202,22 @@
     max-width: none;
   }
 
+  .feed-card-no-summary {
+    min-height: 0;
+  }
+
+  .feed-card-no-summary .feed-card-title {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    -webkit-line-clamp: unset;
+  }
+
+  .feed-card-no-summary .feed-card-meta {
+    margin-top: 0.6rem;
+  }
+
   .feed-card-title {
     color: #242424;
     display: -webkit-box;
