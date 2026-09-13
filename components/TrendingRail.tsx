@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { buildMediaProxyUrl } from "@/lib/media-url";
 import { getFirstArticleImage } from "@/lib/news-media";
+import { cleanNewsSummary } from "@/lib/news-summary";
 import type { NewsItem } from "@/lib/types";
 
 interface TrendingRailProps {
@@ -30,6 +31,8 @@ export default function TrendingRail({ items }: TrendingRailProps) {
   const coverImage = coverUrl
     ? buildMediaProxyUrl(coverUrl, activeItem.link) || coverUrl
     : "";
+  const title = cleanNewsSummary(activeItem.title);
+  const summary = cleanNewsSummary(activeItem.summary);
 
   const showItem = (direction: -1 | 1) => {
     setActiveIndex((current) => (current + direction + items.length) % items.length);
@@ -64,7 +67,7 @@ export default function TrendingRail({ items }: TrendingRailProps) {
         <Link
           href={`/news/${activeItem.id}`}
           className={`trending-carousel-slide ${coverImage ? "has-cover" : ""}`}
-          aria-label={`阅读热门资讯：${activeItem.title}`}
+          aria-label={`阅读热门资讯：${title}`}
         >
           {coverImage && (
             <span
@@ -78,8 +81,8 @@ export default function TrendingRail({ items }: TrendingRailProps) {
               <span className="trending-carousel-label">热门速览</span>
               <span className="source-pill">{activeItem.source}</span>
             </div>
-            <h3>{activeItem.title}</h3>
-            {activeItem.summary && <p>{activeItem.summary}</p>}
+            <h3>{title}</h3>
+            {summary && <p>{summary}</p>}
             <div className="trending-carousel-footer">
               <time>{formatDate(activeItem.publishedAt)}</time>
               <span aria-live="polite">

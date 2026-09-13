@@ -6,6 +6,7 @@ import { toIsoString } from "./news-date";
 import { fetchFromPageSource } from "./source-page";
 import { dedupeNewsItems } from "./news-dedupe";
 import { htmlToArticleMarkdown } from "./article-markdown";
+import { cleanNewsSummary } from "./news-summary";
 
 export const RSS_USER_AGENT =
   "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36";
@@ -46,7 +47,6 @@ function genId(sourceId: string, rawLink: string, rawTitle: string): string {
 function stripHtml(html: string): string {
   return html
     .replace(/<\/?[^>]+(>|$)/g, " ")
-    .replace(/&nbsp;/g, " ")
     .replace(/\s+/g, " ")
     .trim();
 }
@@ -92,7 +92,7 @@ export async function fetchFromSource(
     const entries = feed.items?.slice(0, 15) || [];
 
     for (const item of entries) {
-      const title = stripHtml(item.title || "").trim();
+      const title = cleanNewsSummary(stripHtml(item.title || ""));
       const link = item.link || "";
       if (!title || !link) continue;
 
@@ -102,7 +102,7 @@ export async function fetchFromSource(
         (item as any).contentSnippet ||
         item.description ||
         "";
-      const rawContent = stripHtml(rawMarkup).trim();
+      const rawContent = cleanNewsSummary(stripHtml(rawMarkup));
 
       const summary = truncate(rawContent, 240);
       // RSS 提供完整 HTML 时，保留它的分段、标题和图片；否则详情页再抓原文。

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { buildMediaProxyUrl } from "@/lib/media-url";
 import { getFirstArticleImage } from "@/lib/news-media";
+import { cleanNewsSummary } from "@/lib/news-summary";
 import type { NewsCardProps } from "@/lib/types";
 
 function formatDate(value: string) {
@@ -26,6 +27,8 @@ export default function NewsCard({
   const coverImage = coverUrl
     ? buildMediaProxyUrl(coverUrl, item.link) || coverUrl
     : "";
+  const title = cleanNewsSummary(item.title);
+  const summary = cleanNewsSummary(item.summary);
 
   return (
     <Link
@@ -37,9 +40,9 @@ export default function NewsCard({
           <span className="source-pill">{item.source}</span>
         </div>
 
-        <h3 className="feed-card-title">{item.title}</h3>
+        <h3 className="feed-card-title">{title}</h3>
 
-        {item.summary && <p className="feed-card-summary">{item.summary}</p>}
+        {summary && <p className="feed-card-summary">{summary}</p>}
 
         {showTags && item.tags.length > 0 && (
           <div className="mt-3 flex flex-wrap gap-1.5">
