@@ -88,8 +88,8 @@
 
   .navbar-glass {
     border-bottom: 1px solid #ebebeb;
-    background: rgba(255, 255, 255, 0.96);
-    backdrop-filter: blur(12px);
+    background: rgba(255, 255, 255, 0.84);
+    backdrop-filter: blur(16px);
   }
 
   .btn-primary {
@@ -98,7 +98,7 @@
     justify-content: center;
     min-height: 38px;
     padding: 0.55rem 0.9rem;
-    border-radius: 6px;
+    border-radius: 999px;
     background: #ffd100;
     color: #242424;
     font-size: 0.875rem;
@@ -121,7 +121,7 @@
     min-height: 38px;
     padding: 0.55rem 0.9rem;
     border: 1px solid #dedede;
-    border-radius: 6px;
+    border-radius: 999px;
     background: #ffffff;
     color: #363636;
     font-size: 0.875rem;
@@ -158,42 +158,48 @@
   }
 
   .feed-card {
-    display: block;
-    border-bottom: 1px solid #ececec;
-    padding: 1.1rem 0;
+    display: flex;
+    position: relative;
+    gap: 1rem;
+    margin-top: 0.75rem;
+    overflow: hidden;
+    border: 1px solid #ececec;
+    border-radius: 8px;
+    background: #ffffff;
+    padding: 1rem;
     content-visibility: auto;
     contain-intrinsic-size: auto 10rem;
-    transition: background 160ms ease;
+    transition: border-color 220ms ease, box-shadow 220ms ease, transform 220ms ease;
+  }
+
+  .feed-card:hover {
+    border-color: #d8d8d8;
+    box-shadow: 0 12px 28px -20px rgba(36, 36, 36, 0.45);
+    transform: translateY(-2px);
   }
 
   .feed-card:hover .feed-card-title {
-    color: #9a7100;
+    color: #3157c8;
   }
 
-  .feed-card-featured {
-    border-left: 3px solid #ffd100;
-    padding: 1.1rem 1.25rem;
-    background: #fffdf7;
-  }
-
-  .feed-card-featured + .feed-card-featured {
-    margin-top: 0.75rem;
+  .feed-card-copy {
+    display: flex;
+    min-width: 0;
+    flex: 1;
+    flex-direction: column;
   }
 
   .feed-card-title {
     color: #242424;
     display: -webkit-box;
     overflow: hidden;
+    margin-top: 0.75rem;
     font-size: 1.08rem;
     font-weight: 700;
     line-height: 1.55;
-    transition: color 160ms ease;
+    transition: color 220ms ease;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
-  }
-
-  .feed-card-featured .feed-card-title {
-    font-size: 1.22rem;
   }
 
   .feed-card-summary {
@@ -205,6 +211,56 @@
     line-height: 1.7;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
+  }
+
+  .feed-card-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-top: 0.9rem;
+    color: #999999;
+    font-size: 0.75rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .feed-card-meta time {
+    margin-left: auto;
+  }
+
+  .feed-card-arrow {
+    display: inline-block;
+    color: #3157c8;
+    font-size: 1rem;
+    font-weight: 700;
+    opacity: 0;
+    transform: translateX(-6px);
+    transition: opacity 220ms ease, transform 220ms ease;
+  }
+
+  .feed-card:hover .feed-card-arrow {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  .feed-card-thumb {
+    width: 124px;
+    flex: 0 0 124px;
+    align-self: stretch;
+    overflow: hidden;
+    border-radius: 6px;
+    background: #f3f3f3;
+  }
+
+  .feed-card-thumb img {
+    width: 100%;
+    height: 100%;
+    min-height: 96px;
+    object-fit: cover;
+    transition: transform 500ms ease;
+  }
+
+  .feed-card:hover .feed-card-thumb img {
+    transform: scale(1.05);
   }
 
   .news-layout {
@@ -299,8 +355,6 @@
     min-height: 320px;
     overflow: hidden;
     background-color: #2b2b2b;
-    background-position: center;
-    background-size: cover;
     color: #ffffff;
   }
 
@@ -312,6 +366,18 @@
     position: absolute;
     inset: 0;
     background: rgba(0, 0, 0, 0.56);
+  }
+
+  .trending-carousel-image {
+    position: absolute;
+    inset: 0;
+    background-position: center;
+    background-size: cover;
+    transition: transform 500ms ease;
+  }
+
+  .trending-carousel-slide:hover .trending-carousel-image {
+    transform: scale(1.05);
   }
 
   .trending-carousel-content {
@@ -710,6 +776,43 @@
 
   .feed-card-featured .feed-card-title {
     font-size: 1.08rem;
+  }
+
+  .feed-card {
+    gap: 0.75rem;
+    padding: 0.85rem;
+  }
+
+  .feed-card-thumb {
+    width: 96px;
+    flex-basis: 96px;
+  }
+
+  .feed-card-thumb img {
+    min-height: 88px;
+  }
+
+  .feed-card-title {
+    margin-top: 0.6rem;
+    font-size: 1rem;
+  }
+
+  .feed-card-summary {
+    font-size: 0.84rem;
+    line-height: 1.6;
+  }
+
+  .trending-carousel-slide,
+  .trending-carousel-content {
+    min-height: 270px;
+  }
+
+  .trending-carousel-content {
+    padding: 1.25rem;
+  }
+
+  .trending-carousel-content h3 {
+    font-size: 1.25rem;
   }
 
   .article-reading {

@@ -65,12 +65,13 @@ export default function TrendingRail({ items }: TrendingRailProps) {
           href={`/news/${activeItem.id}`}
           className={`trending-carousel-slide ${coverImage ? "has-cover" : ""}`}
           aria-label={`阅读热门资讯：${activeItem.title}`}
-          style={
-            coverImage
-              ? { backgroundImage: `url("${coverImage}")` }
-              : undefined
-          }
         >
+          {coverImage && (
+            <span
+              className="trending-carousel-image"
+              style={{ backgroundImage: `url("${coverImage}")` }}
+            />
+          )}
           <div className="trending-carousel-overlay" />
           <div className="trending-carousel-content">
             <div className="trending-rail-card-top">

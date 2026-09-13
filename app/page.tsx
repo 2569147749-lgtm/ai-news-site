@@ -1,4 +1,3 @@
-import NewsCard from "@/components/NewsCard";
 import NewsFeed from "@/components/NewsFeed";
 import TrendingRail from "@/components/TrendingRail";
 import { getNewsWithFallback } from "@/lib/data";
@@ -29,8 +28,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   const trendingItems = prioritizeNewsWithImages(
     getHomepageHighlights(items, new Date(), 20).map((result) => result.item)
   ).slice(0, 5);
-  const featuredItems = items.slice(0, 3);
-  const updates = getNewsPage(items.slice(3), 1, visibleBatches * 20);
+  const updates = getNewsPage(items, 1, visibleBatches * 20);
 
   return (
     <div className="site-shell py-7 md:py-10">
@@ -62,32 +60,15 @@ export default async function HomePage({ searchParams }: HomePageProps) {
             资讯正在同步，请稍后刷新。
           </div>
         ) : (
-          <>
-            {featuredItems.length > 0 && (
-              <section>
-                <div className="mb-2 flex items-center justify-between">
-                  <h2 className="section-title">今日重点</h2>
-                  <span className="text-xs text-ink-dim">{items.length} 条更新</span>
-                </div>
-                <div>
-                  {featuredItems.map((item) => (
-                    <NewsCard key={item.id} item={item} featured />
-                  ))}
-                </div>
-              </section>
-            )}
-
+          <section>
+            <NewsFeed
+              initialItems={updates.items}
+              initialPage={visibleBatches}
+              initialHasMore={updates.hasMore}
+              totalItems={items.length}
+            />
             <TrendingRail items={trendingItems} />
-
-            <section className={featuredItems.length > 0 ? "mt-9" : ""}>
-              <NewsFeed
-                initialItems={updates.items}
-                initialPage={visibleBatches}
-                initialHasMore={updates.hasMore}
-                totalItems={items.slice(3).length}
-              />
-            </section>
-          </>
+          </section>
         )}
       </div>
     </div>
