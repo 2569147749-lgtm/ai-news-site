@@ -208,9 +208,8 @@
 
   .feed-card-no-summary .feed-card-title {
     display: block;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    overflow: visible;
+    white-space: normal;
     -webkit-line-clamp: unset;
   }
 
