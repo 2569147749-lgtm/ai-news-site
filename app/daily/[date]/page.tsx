@@ -1,12 +1,14 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getNewsWithFallback } from "@/lib/data";
+import { getShanghaiDate, isValidDate } from "@/lib/news-date";
 import NewsCard from "@/components/NewsCard";
 
 interface Props {
   params: { date: string };
 }
 
+export const dynamic = "force-dynamic";
 export const revalidate = 600;
 
 export async function generateMetadata({ params }: Props) {
@@ -19,7 +21,9 @@ export async function generateMetadata({ params }: Props) {
 export default async function DailyDetail({ params }: Props) {
   const items = await getNewsWithFallback();
   const dayItems = items.filter(
-    (i) => i.publishedAt.slice(0, 10) === params.date
+    (i) =>
+      isValidDate(i.publishedAt) &&
+      getShanghaiDate(i.publishedAt) === params.date
   );
 
   if (dayItems.length === 0) {

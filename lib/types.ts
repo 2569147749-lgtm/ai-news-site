@@ -22,6 +22,7 @@ export interface DailyReport {
 export interface NewsCardProps {
   item: NewsItem;
   featured?: boolean;
+  showTags?: boolean;
 }
 
 export interface SiteConfig {

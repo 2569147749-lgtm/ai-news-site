@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { getNewsWithFallback } from "@/lib/data";
 import { getAllDates } from "@/lib/kv";
+import { getShanghaiDate, isValidDate } from "@/lib/news-date";
 import NewsCard from "@/components/NewsCard";
 
+export const dynamic = "force-dynamic";
 export const revalidate = 600;
 
 export const metadata = {
@@ -32,14 +34,16 @@ export default async function DailyIndex() {
             <div className="text-5xl mb-4 opacity-60">⚠</div>
             <h3 className="text-xl font-bold text-ink-main mb-2">暂无数据</h3>
             <p className="text-sm text-ink-sub font-mono">
-              请先访问 <span className="text-aqua font-semibold">/api/crawl</span> 触发一次抓取
+              资讯正在同步中，请稍后刷新页面
             </p>
           </div>
         ) : (
           <div className="space-y-14">
             {dates.map((date) => {
               const dayItems = items.filter(
-                (i) => i.publishedAt.slice(0, 10) === date
+                (i) =>
+                  isValidDate(i.publishedAt) &&
+                  getShanghaiDate(i.publishedAt) === date
               );
 
               return (

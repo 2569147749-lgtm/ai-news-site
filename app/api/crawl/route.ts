@@ -1,22 +1,38 @@
 import { NextResponse } from "next/server";
-import { crawlAllSources } from "@/lib/rss";
+import { refreshNews } from "@/lib/data";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const hasCronSecret =
-      typeof process !== "undefined" && !!process.env?.CRON_SECRET;
-    /* 开发环境不强制鉴权，生产通过 Vercel Cron Authorization 头 */
-    void hasCronSecret;
+    const cronSecret =
+      typeof process !== "undefined" ? process.env?.CRON_SECRET : undefined;
 
-    const result = await crawlAllSources();
+    if (process.env.NODE_ENV === "production" && !cronSecret) {
+      return NextResponse.json(
+        { ok: false, error: "CRON_SECRET is not configured" },
+        { status: 503 }
+      );
+    }
+
+    if (cronSecret && request.headers.get("authorization") !== `Bearer ${cronSecret}`) {
+      return NextResponse.json(
+        { ok: false, error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
+    const result = await refreshNews();
 
     return NextResponse.json({
       ok: true,
       timestamp: new Date().toISOString(),
-      ...result,
+      total: result.total,
+      saved: result.saved,
+      fallback: result.fallback,
+      perSource: result.perSource,
+      items: result.items,
     });
   } catch (err) {
     return NextResponse.json(

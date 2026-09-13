@@ -1,10 +1,17 @@
 import { NewsItem } from "./types";
+import { createHash } from "crypto";
 
 const DAY = 1000 * 60 * 60 * 24;
 
+function genId(sourceId: string, rawLink: string, rawTitle: string): string {
+  const base = `${sourceId}||${rawLink}||${rawTitle}`;
+  const hash = createHash("sha256").update(base).digest("hex").slice(0, 12);
+  return hash;
+}
+
 const demoItems: NewsItem[] = [
   {
-    id: "demo-1",
+    id: genId("openai-blog", "https://openai.com/index/introducing-o3/", "OpenAI 发布全新推理模型 o3，数学能力再突破"),
     title: "OpenAI 发布全新推理模型 o3，数学能力再突破",
     link: "https://openai.com/index/introducing-o3/",
     summary:
@@ -20,7 +27,7 @@ const demoItems: NewsItem[] = [
     tags: ["大模型", "产品发布"],
   },
   {
-    id: "demo-2",
+    id: genId("anthropic-research", "https://anthropic.com", "Anthropic 推出 Claude 视频理解能力，支持长视频分析"),
     title: "Anthropic 推出 Claude 视频理解能力，支持长视频分析",
     link: "https://anthropic.com",
     summary:
@@ -36,7 +43,7 @@ const demoItems: NewsItem[] = [
     tags: ["多模态", "大模型"],
   },
   {
-    id: "demo-3",
+    id: genId("jiqizhixin", "https://jiqizhixin.com", "机器之心：2026 年大模型行业白皮书发布"),
     title: "机器之心：2026 年大模型行业白皮书发布",
     link: "https://jiqizhixin.com",
     summary:
@@ -52,7 +59,7 @@ const demoItems: NewsItem[] = [
     tags: ["行业动态", "大模型"],
   },
   {
-    id: "demo-4",
+    id: genId("arxiv-ai", "https://arxiv.org", "arXiv 本周精选：多篇多模态论文集中发布"),
     title: "arXiv 本周精选：多篇多模态论文集中发布",
     link: "https://arxiv.org",
     summary:
@@ -68,7 +75,7 @@ const demoItems: NewsItem[] = [
     tags: ["论文", "多模态"],
   },
   {
-    id: "demo-5",
+    id: genId("google-ai", "https://ai.googleblog.com", "Google 发布 Gemini Nano 3：端侧模型性能再升级"),
     title: "Google 发布 Gemini Nano 3：端侧模型性能再升级",
     link: "https://ai.googleblog.com",
     summary:
@@ -84,7 +91,7 @@ const demoItems: NewsItem[] = [
     tags: ["大模型", "开源"],
   },
   {
-    id: "demo-6",
+    id: genId("mit-technology-review-ai", "https://technologyreview.com", "MIT Technology Review：AI 芯片市场进入战国时代"),
     title: "MIT Technology Review：AI 芯片市场进入战国时代",
     link: "https://technologyreview.com",
     summary:
@@ -100,7 +107,7 @@ const demoItems: NewsItem[] = [
     tags: ["行业动态", "芯片"],
   },
   {
-    id: "demo-7",
+    id: genId("meta-ai", "https://ai.meta.com", "Meta 开源 Llama 4：首个支持 1T tokens 的开源模型"),
     title: "Meta 开源 Llama 4：首个支持 1T tokens 的开源模型",
     link: "https://ai.meta.com",
     summary:
@@ -116,7 +123,7 @@ const demoItems: NewsItem[] = [
     tags: ["开源", "大模型"],
   },
   {
-    id: "demo-8",
+    id: genId("stanford-ailab", "https://stanford.edu", "斯坦福 HumanEval 榜单刷新：国产模型首次登顶"),
     title: "斯坦福 HumanEval 榜单刷新：国产模型首次登顶",
     link: "https://stanford.edu",
     summary:
@@ -132,7 +139,7 @@ const demoItems: NewsItem[] = [
     tags: ["研究进展", "大模型"],
   },
   {
-    id: "demo-9",
+    id: genId("bytedance", "https://www.doubao.com", "字节跳动推出豆包新版本：支持原生 Agent 能力"),
     title: "字节跳动推出豆包新版本：支持原生 Agent 能力",
     link: "https://www.doubao.com",
     summary:
@@ -148,7 +155,7 @@ const demoItems: NewsItem[] = [
     tags: ["产品发布", "Agent"],
   },
   {
-    id: "demo-10",
+    id: genId("apple-ml", "https://machinelearning.apple.com", "苹果发布 MM1.5-Pro：多模态理解能力全面提升"),
     title: "苹果发布 MM1.5-Pro：多模态理解能力全面提升",
     link: "https://machinelearning.apple.com",
     summary:

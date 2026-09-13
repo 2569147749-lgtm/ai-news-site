@@ -1,26 +1,153 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 import NewsCard from "@/components/NewsCard";
 import ArticleBody from "@/components/ArticleBody";
-import { getNewsWithFallback } from "@/lib/data";
-import { getNewsBySlug } from "@/lib/kv";
+import { extractArticle } from "@/lib/article-extractor";
+import {
+  getArticleAttribution,
+  stripArticleBoilerplate,
+} from "@/lib/article-format";
+import { getNewsItemById, getNewsWithFallback } from "@/lib/data";
+import { getShanghaiDate } from "@/lib/news-date";
 
 interface Props {
   params: { slug: string };
 }
 
+export const dynamic = "force-dynamic";
 export const revalidate = 600;
 
-export async function generateMetadata({ params }: Props) {
-  const items = await getNewsWithFallback();
-  const item =
-    (await getNewsBySlug(params.slug)) ||
-    items.find((i) => i.id === params.slug);
+/* ========== 全文提取（独立的 Server Component，可以被 Suspense 包裹） ========== */
+interface FullContentCache {
+  content: string;
+  cachedAt: number;
+}
+const fullContentCache = new Map<string, FullContentCache>();
+const FULL_CONTENT_TTL = 1000 * 60 * 60 * 24; // 24 小时
 
-  if (!item) {
-    return { title: "未找到 · Aura Daily" };
+function hasStructuredContent(content: string) {
+  return /(^#{1,4}\s|!\[[^\]]*]\(|^>\s|^-\s)/m.test(content);
+}
+
+async function FullArticleBody({
+  link,
+  source,
+  existingContent,
+  summary,
+}: {
+  link?: string;
+  summary?: string;
+  source: string;
+  existingContent?: string;
+}) {
+  const safeLink = link || "";
+  const safeSummary = summary || "";
+  const safeExisting = existingContent || "";
+
+  // 1) 如果 RSS 已经提供了足够长的正文 → 直接用
+  if (
+    safeExisting &&
+    safeExisting.length > 500 &&
+    hasStructuredContent(safeExisting)
+  ) {
+    return (
+      <ArticleBody
+        content={stripArticleBoilerplate(safeExisting)}
+        link={safeLink}
+        source={source}
+      />
+    );
   }
 
+  // 2) 内存缓存？
+  if (safeLink) {
+    const cached = fullContentCache.get(safeLink);
+    const now = Date.now();
+    if (cached && now - cached.cachedAt < FULL_CONTENT_TTL) {
+      return (
+        <ArticleBody
+          content={stripArticleBoilerplate(cached.content)}
+          link={safeLink}
+          source={source}
+        />
+      );
+    }
+  }
+
+  // 3) 调 Jina Reader（最多 8 秒，失败回退 summary）
+  let finalContent: string = safeExisting || safeSummary || "";
+  if (safeLink) {
+    try {
+      const extracted = await Promise.race([
+        extractArticle(safeLink),
+        new Promise<null>((_, rej) => setTimeout(() => rej("timeout"), 8000)),
+      ]);
+      if (extracted && extracted.content && extracted.content.length > 200) {
+        fullContentCache.set(safeLink, {
+          content: extracted.content,
+          cachedAt: Date.now(),
+        });
+        finalContent = extracted.content;
+      }
+    } catch {
+      // 超时或失败 → 继续使用 summary
+    }
+  }
+
+  return (
+    <ArticleBody
+      content={stripArticleBoilerplate(
+        finalContent || safeSummary || "暂无全文内容，请点击下方链接查看原文。"
+      )}
+      link={safeLink}
+      source={source}
+    />
+  );
+}
+
+/* ========== 相关文章（也包在 Suspense 里） ========== */
+async function RelatedArticles({ itemId, category, tags }: { itemId: string; category: string; tags: string[] }) {
+  const items = await getNewsWithFallback();
+  const relatedItems = items
+    .filter(
+      (i) =>
+        i.id !== itemId &&
+        (i.category === category || i.tags.some((t) => tags.includes(t)))
+    )
+    .slice(0, 4);
+
+  if (relatedItems.length === 0) return null;
+
+  return (
+    <section className="mt-16">
+      <h2 className="section-title mb-3 border-b border-sand-edge pb-3">相关资讯</h2>
+      <div className="grid md:grid-cols-2 gap-4">
+        {relatedItems.map((r) => (
+          <NewsCard key={r.id} item={r} />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/* ========== 全文正文的加载骨架 ========== */
+function ArticleLoading() {
+  return (
+    <div className="mb-8 py-6">
+      <div className="space-y-4 animate-pulse">
+        <div className="h-4 w-full rounded bg-sand-soft" />
+        <div className="h-4 w-[94%] rounded bg-sand-soft" />
+        <div className="h-4 w-[80%] rounded bg-sand-soft" />
+      </div>
+    </div>
+  );
+}
+
+/* ========== Metadata ========== */
+export async function generateMetadata({ params }: Props) {
+  const item = await getNewsItemById(params.slug);
+  if (!item) return { title: "未找到 · Aura Daily" };
   return {
     title: `${item.title} · Aura Daily`,
     description: item.summary,
@@ -28,110 +155,83 @@ export async function generateMetadata({ params }: Props) {
   };
 }
 
+/* ========== 主页面：先渲染文章元数据，正文和相关文章异步加载 ========== */
 export default async function NewsDetailPage({ params }: Props) {
-  const items = await getNewsWithFallback();
-  const item =
-    (await getNewsBySlug(params.slug)) ||
-    items.find((i) => i.id === params.slug);
-
-  if (!item) {
-    notFound();
-  }
-
-  const relatedItems = items
-    .filter(
-      (i) =>
-        i.id !== item.id &&
-        (i.category === item.category || i.tags.some((t) => item.tags.includes(t)))
-    )
-    .slice(0, 4);
+  const item = await getNewsItemById(params.slug);
+  if (!item) notFound();
+  const attribution = getArticleAttribution(
+    `${item.content || ""}\n${item.summary || ""}`,
+    item.source
+  );
 
   return (
-    <div className="relative">
-      <div className="absolute inset-0 bg-sand-grid opacity-50 pointer-events-none"></div>
-
-      <div className="relative max-w-4xl mx-auto px-4 py-14">
+    <div className="site-shell max-w-4xl py-8 md:py-12">
         <Link
-          href="/news"
-          className="text-sm text-ink-sub hover:text-amber-700 transition-colors inline-flex items-center gap-1 mb-8 font-mono focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2"
+          href="/"
+          className="mb-7 inline-flex text-sm text-ink-sub hover:text-ink-main"
         >
-          ← 返回全部资讯
+          返回首页
         </Link>
 
         <article>
-          {/* 标签条 */}
-          <div className="flex items-center gap-2 mb-6 flex-wrap">
-            <span className="chip-muted">{item.source}</span>
-            <span className="chip-amber">{item.category}</span>
-            <time className="ml-auto text-xs font-mono text-ink-sub">
-              {new Date(item.publishedAt).toISOString().replace("T", " · ").slice(0, 19)} UTC
-            </time>
-          </div>
-
-          {/* 标题 */}
-          <h1 className="text-xl md:text-3xl font-semibold text-ink-main leading-tight mb-6 tracking-wide" style={{ textWrap: "balance" }}>
+          {/* 标题 — 立刻渲染 */}
+          <h1
+            className="mb-3 text-2xl font-extrabold leading-tight text-ink-main md:text-4xl"
+            style={{ textWrap: "balance" }}
+          >
             {item.title}
           </h1>
 
-          {/* Tags */}
-          {item.tags.length > 0 && (
-            <div className="mb-10 flex flex-wrap gap-2">
-              {item.tags.map((t, i) => (
-                <span key={t} className={i % 3 === 0 ? "chip-amber" : i % 3 === 1 ? "chip-aqua" : "chip-coral"}>
-                  #{t}
-                </span>
-              ))}
+          <p className="article-attribution mb-10">
+            {attribution.publication && <span>{attribution.publication}</span>}
+            {attribution.author && <span> · {attribution.author}</span>}
+            <span> · {getShanghaiDate(item.publishedAt)}</span>
+          </p>
+
+          {/* 🔑 正文全文 — 通过 Suspense 异步加载（不阻塞首屏） */}
+          <Suspense fallback={<ArticleLoading />}>
+            <FullArticleBody
+              link={item.link}
+              summary={item.summary}
+              source={item.source}
+              existingContent={item.content}
+            />
+          </Suspense>
+
+          {/* 原文链接 — 立刻渲染 */}
+          {item.link && (
+            <div className="mt-12 text-center">
+              <a
+                href={item.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-primary"
+              >
+                查看原文 ↗
+              </a>
             </div>
           )}
-
-          {/* 正文：有 content 直接显示；没有就自动从原文 URL 实时提取 */}
-          <ArticleBody
-            summary={item.summary}
-            content={item.content}
-            link={item.link}
-            source={item.source}
-          />
-
-          {/* 原文 CTA */}
-          <div className="neon-card p-8 mb-10">
-            <h2 className="text-lg font-bold text-ink-main mb-3 flex items-center gap-2">
-              <span>📄</span> 查看原文
-            </h2>
-            <p className="text-sm text-ink-sub mb-5">
-              完整内容由 <span className="text-amber-700 font-semibold">{item.source}</span> 发布，
-              点击下方按钮访问原文。
-            </p>
-            <a
-              href={item.link}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn-neon !px-6 !py-3 inline-flex focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2"
-            >
-              打开原文 ↗
-            </a>
-            <div className="mt-4 text-xs font-mono text-ink-sub break-all">
-              → {item.link}
-            </div>
-          </div>
         </article>
 
-        {/* 相关资讯 */}
-        {relatedItems.length > 0 && (
-          <section className="mt-16">
-            <div className="inline-flex items-center gap-2 text-xs font-mono font-semibold tracking-[0.2em] text-amber-700 mb-5">
-              // RELATED · FEED
-            </div>
-            <h2 className="text-xl md:text-2xl font-bold text-ink-main mb-6 tracking-wide">
-              相关<span className="text-gradient-brand">资讯</span>
-            </h2>
-            <div className="grid md:grid-cols-2 gap-4">
-              {relatedItems.map((r) => (
-                <NewsCard key={r.id} item={r} />
-              ))}
-            </div>
-          </section>
-        )}
-      </div>
+        {/* 🔑 相关文章 — 也包在 Suspense 里，不和首屏争抢时间 */}
+        <Suspense
+          fallback={
+            <section className="mt-16">
+              <div className="h-4 w-32 bg-sand-edge/40 rounded mb-5" />
+              <div className="h-7 w-32 bg-sand-edge/30 rounded mb-6" />
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="h-32 bg-sand-edge/20 rounded-xl animate-pulse-slow" />
+                <div className="h-32 bg-sand-edge/20 rounded-xl animate-pulse-slow" />
+              </div>
+            </section>
+          }
+        >
+          <RelatedArticles
+            itemId={item.id}
+            category={item.category}
+            tags={item.tags}
+          />
+        </Suspense>
     </div>
   );
 }

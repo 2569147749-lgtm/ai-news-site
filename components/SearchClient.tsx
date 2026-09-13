@@ -10,26 +10,53 @@ export default function SearchClient() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const initialQ = searchParams.get("q") || "";
+  const initialPage = Number(searchParams.get("page") || "1");
 
   const [query, setQuery] = useState(initialQ);
   const [loading, setLoading] = useState(false);
   const [items, setItems] = useState<NewsItem[]>([]);
   const [total, setTotal] = useState(0);
   const [searched, setSearched] = useState(false);
+  const [error, setError] = useState("");
+  const [trending, setTrending] = useState(!initialQ);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [hasMore, setHasMore] = useState(false);
 
   useEffect(() => {
-    if (!initialQ) return;
-
     let cancelled = false;
     setLoading(true);
+    setError("");
+    setQuery(initialQ);
 
-    fetch(`/api/search?q=${encodeURIComponent(initialQ)}`)
-      .then((r) => r.json())
+    const requestUrl = initialQ
+      ? `/api/search?q=${encodeURIComponent(initialQ)}&page=${initialPage}`
+      : `/api/search?page=${initialPage}`;
+    fetch(requestUrl)
+      .then(async (response) => {
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || "搜索暂时不可用");
+        return data;
+      })
       .then((data) => {
         if (cancelled) return;
         setItems(data.items || []);
         setTotal(data.total || 0);
+        setTrending(data.kind === "trending");
+        setPage(data.page || 1);
+        setTotalPages(data.totalPages || 1);
+        setHasMore(Boolean(data.hasMore));
         setSearched(true);
+      })
+      .catch((requestError) => {
+        if (!cancelled) {
+          setItems([]);
+          setTotal(0);
+          setSearched(true);
+          setError(
+            requestError instanceof Error ? requestError.message : "搜索暂时不可用"
+          );
+        }
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -38,25 +65,29 @@ export default function SearchClient() {
     return () => {
       cancelled = true;
     };
-  }, [initialQ]);
+  }, [initialPage, initialQ]);
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     const q = query.trim();
-    if (!q) return;
-    router.push(`/search?q=${encodeURIComponent(q)}`);
+    router.push(q ? `/search?q=${encodeURIComponent(q)}` : "/search");
+  };
+
+  const goToPage = (nextPage: number) => {
+    const params = new URLSearchParams();
+    if (initialQ) params.set("q", initialQ);
+    params.set("page", String(nextPage));
+    router.push(`/search?${params.toString()}`);
   };
 
   return (
-    <div className="relative bg-sand-grid">
-      <div className="relative max-w-5xl mx-auto px-4 py-14">
-        <div className="mb-10 text-center">
-          <div className="text-xs font-mono font-semibold tracking-[0.2em] text-amber-700 mb-3">// SEARCH ENGINE</div>
-          <h1 className="text-3xl md:text-5xl font-black text-ink-main mb-4 tracking-tight">
-            站内<span className="text-gradient-brand">搜索</span>
-          </h1>
+    <div>
+      <div className="site-shell max-w-5xl py-8 md:py-10">
+        <div className="mb-8 border-b border-sand-edge pb-6">
+          <p className="section-kicker">SEARCH</p>
+          <h1 className="mt-1 text-2xl font-extrabold text-ink-main md:text-3xl">搜索资讯</h1>
 
-          <form onSubmit={handleSubmit} className="flex gap-2 max-w-2xl mx-auto mt-8">
+          <form onSubmit={handleSubmit} className="mt-6 flex max-w-2xl gap-2">
             <div className="relative flex-1 min-w-0">
               <input
                 id="search"
@@ -67,67 +98,84 @@ export default function SearchClient() {
                 placeholder="搜索关键词、标题、标签…"
                 autoComplete="off"
                 aria-label="搜索资讯"
-                className="w-full px-5 py-3.5 bg-sand-card border border-sand-edge rounded-full text-ink-main placeholder:text-ink-dim focus:outline-none focus:border-amber-300 focus:shadow-float transition-all text-sm font-mono"
+                className="w-full rounded-md border border-sand-edge px-4 py-2.5 text-sm text-ink-main placeholder:text-ink-dim focus:border-amber"
               />
             </div>
             <button
               type="submit"
-              className="btn-neon !px-6 !py-3.5 !text-sm whitespace-nowrap"
+              className="btn-primary whitespace-nowrap"
             >
               搜索
             </button>
           </form>
 
-          <div className="mt-4 flex flex-wrap justify-center gap-2 text-xs text-ink-sub font-mono">
-            <span>建议搜索：</span>
-            {["大模型", "论文", "多模态", "OpenAI", "Claude"].map((kw) => (
-              <Link
-                key={kw}
-                href={`/search?q=${encodeURIComponent(kw)}`}
-                className="px-2 py-0.5 rounded-full bg-sand-card border border-sand-edge hover:border-amber-300 hover:text-amber-700 hover:shadow-card transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2"
-              >
-                {kw}
-              </Link>
-            ))}
-          </div>
         </div>
 
         {searched && !loading && (
-          <div className="mb-8 text-center" role="status" aria-live="polite">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-sand-edge bg-sand-card text-xs font-mono shadow-card">
-              <span className="text-ink-sub">QUERY:</span>
-              <span className="text-amber-700 font-semibold">&quot;{initialQ}&quot;</span>
-              <span className="text-ink-dim">|</span>
-              <span className="text-ink-sub">FOUND:</span>
-              <span className="text-aqua font-bold">{total}</span>
+          !trending && (
+            <div className="mb-8 text-center" role="status" aria-live="polite">
+              <div className="inline-flex items-center gap-2 text-sm text-ink-sub">
+                <span>“{initialQ}”</span>
+                <span>共 {total} 条结果，按相关性排序</span>
+              </div>
             </div>
-          </div>
+          )
         )}
 
         {loading && (
           <div className="text-center py-16" aria-live="polite">
-            <div className="inline-block w-8 h-8 border-[3px] border-amber-300/40 border-t-amber-700 rounded-full animate-spin mb-4"></div>
-            <div className="text-aqua font-mono text-sm">SEARCHING…</div>
+            <div className="inline-block h-7 w-7 animate-spin rounded-full border-[3px] border-sand-edge border-t-amber mb-4"></div>
+            <div className="text-sm text-ink-sub">正在搜索</div>
+          </div>
+        )}
+
+        {!loading && error && (
+          <div className="border-y border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700" role="alert">
+            {error}
           </div>
         )}
 
         {!loading && items.length === 0 && searched && (
-          <div className="bg-sand-card border border-sand-edge rounded-2xl shadow-card hover:border-amber-300 hover:shadow-float transition-all p-10 text-center">
-            <div className="text-6xl mb-4 opacity-60">--</div>
+          <div className="border-y border-sand-edge p-10 text-center">
             <h3 className="text-xl font-bold text-ink-main mb-2">未找到匹配内容</h3>
-            <p className="text-sm text-ink-sub">换个关键词再试试？可以用更短的词</p>
+            <p className="text-sm text-ink-sub">
+              {error ? "请稍后重试。" : "换个关键词再试试？可以用更短的词"}
+            </p>
           </div>
         )}
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="mt-4">
           {!loading && items.map((item) => (
             <NewsCard key={item.id} item={item} />
           ))}
         </div>
+
+        {!loading && searched && items.length > 0 && (
+          <nav
+            className="mt-7 flex items-center justify-center gap-3"
+            aria-label="搜索结果分页"
+          >
+            {page > 1 && (
+              <button type="button" className="btn-secondary" onClick={() => goToPage(page - 1)}>
+                上一页
+              </button>
+            )}
+            {(hasMore || page > 1) && (
+              <span className="text-xs tabular-nums text-ink-dim">
+                第 {page} / {totalPages} 页
+              </span>
+            )}
+            {hasMore && (
+              <button type="button" className="btn-secondary" onClick={() => goToPage(page + 1)}>
+                下一页
+              </button>
+            )}
+          </nav>
+        )}
       </div>
 
-      <div className="mt-16 text-center pb-10">
-        <Link href="/" className="inline-flex items-center gap-2 text-xs text-ink-sub hover:text-amber-700 font-mono transition-colors">
+      <div className="mt-12 pb-4 text-center">
+        <Link href="/" className="text-xs text-ink-sub hover:text-ink-main">
           返回首页
         </Link>
       </div>

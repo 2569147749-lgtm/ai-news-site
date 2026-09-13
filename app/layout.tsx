@@ -2,26 +2,27 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import RouteProgress from "@/components/RouteProgress";
 
 export const metadata: Metadata = {
-  title: "Aura Daily · AI 每日资讯",
+  title: "AI 日报 · 中文 AI 资讯",
   description:
-    "自动聚合全球 AI 领域的新闻、论文、产品发布与官方动态，每日整理 AI 早报，5 分钟掌握行业动态。",
-  keywords: ["AI新闻", "人工智能", "GPT", "Claude", "大模型", "AI早报", "AI资讯", "技术资讯"],
-  authors: [{ name: "Aura Daily" }],
+    "聚合极客公园、36氪、虎嗅、品玩、量子位与雷锋网的中文 AI 产品、行业和应用资讯。",
+  keywords: ["AI新闻", "人工智能", "大模型", "智能体", "AI产品", "AI早报", "AI资讯"],
+  authors: [{ name: "AI 日报" }],
   openGraph: {
-    title: "Aura Daily · AI 每日资讯",
+    title: "AI 日报 · 中文 AI 资讯",
     description:
-      "全球 AI 动态一站聚合，每日早报快速掌握行业最新进展",
+      "聚合中文 AI 产品、行业与应用资讯。",
     type: "website",
     locale: "zh_CN",
-    siteName: "Aura Daily",
+    siteName: "AI 日报",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Aura Daily · AI 每日资讯",
+    title: "AI 日报 · 中文 AI 资讯",
     description:
-      "每日整理 AI 行业动态，5 分钟了解 AI 世界",
+      "聚合中文 AI 产品、行业与应用资讯。",
   },
 };
 
@@ -37,6 +38,10 @@ export default function RootLayout({
   return (
     <html lang="zh-CN">
       <body>
+        <a href="#main-content" className="skip-link">
+          跳到正文
+        </a>
+        <RouteProgress />
         <Navbar />
         <main id="main-content" role="main">
           {children}

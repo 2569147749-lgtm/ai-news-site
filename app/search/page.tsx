@@ -1,9 +1,10 @@
 import { Suspense } from "react";
 import SearchClient from "@/components/SearchClient";
 
+export const dynamic = "force-dynamic";
 export const metadata = {
-  title: "站内搜索 · Aura Daily",
-  description: "在 Aura Daily 站内搜索 AI 相关的新闻、论文、产品动态等内容。",
+  title: "搜索资讯 · AI 日报",
+  description: "搜索中文 AI 产品、行业与应用资讯。",
 };
 
 export default function SearchPage() {

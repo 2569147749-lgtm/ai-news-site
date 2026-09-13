@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { rssSources } from "@/config/sources";
 
+export const dynamic = "force-dynamic";
 export const metadata = {
   title: "关于 · Aura Daily",
   description: "关于本站的技术栈、信息来源与使用说明。",

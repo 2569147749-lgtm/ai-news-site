@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useRef } from "react";
 
+export const dynamic = "force-dynamic";
+
 // ========== 场景数据 ==========
 const scenes = [
   {
@@ -110,7 +112,7 @@ export default function MovieReviewPage() {
   const [currentScene, setCurrentScene] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
   const [showNarration, setShowNarration] = useState(true);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // 自动播放逻辑
   useEffect(() => {

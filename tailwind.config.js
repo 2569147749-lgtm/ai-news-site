@@ -8,29 +8,29 @@ module.exports = {
     extend: {
       colors: {
         sand: {
-          bg: "#fffbf2",
-          soft: "#fef7e4",
-          card: "#fffdf8",
-          edge: "#f0e6d0",
-          dim: "#e8ddb8",
+          bg: "#ffffff",
+          soft: "#fff9df",
+          card: "#ffffff",
+          edge: "#ececec",
+          dim: "#d9d9d9",
         },
         ink: {
-          main: "#1f2937",
-          sub: "#6b7280",
-          dim: "#9ca3af",
+          main: "#242424",
+          sub: "#666666",
+          dim: "#999999",
         },
         amber: {
-          DEFAULT: "#f59e0b",
-          soft: "#fde68a",
-          deep: "#b45309",
+          DEFAULT: "#ffd100",
+          soft: "#fff1a8",
+          deep: "#8a6500",
         },
         aqua: {
-          DEFAULT: "#06b6d4",
-          soft: "#a5f3fc",
+          DEFAULT: "#6b7280",
+          soft: "#f3f4f6",
         },
         coral: {
-          DEFAULT: "#ef4444",
-          soft: "#fecaca",
+          DEFAULT: "#9a7100",
+          soft: "#fff7cc",
         },
       },
       fontFamily: {

@@ -1,5 +1,6 @@
 import { getNewsWithFallback } from "@/lib/data";
 
+export const dynamic = "force-dynamic";
 export const revalidate = 3600;
 
 function escapeXml(s: string): string {
@@ -13,7 +14,10 @@ function escapeXml(s: string): string {
 
 export async function GET() {
   const items = await getNewsWithFallback();
-  const base = "https://ai-news.example.com";
+  const base = (process.env.SITE_URL || "https://ai-news.example.com").replace(
+    /\/$/,
+    ""
+  );
   const now = new Date().toUTCString();
 
   const itemsXml = items
@@ -27,7 +31,7 @@ export async function GET() {
       <description>${escapeXml(item.summary || "")}</description>
       <category>${escapeXml(item.category)}</category>
       <source>${escapeXml(item.source)}</source>
-      <guid isPermaLink="false">${base}/news/${item.id}</guid>
+      <guid isPermaLink="false">${base}/news/${encodeURIComponent(item.id)}</guid>
     </item>`
     )
     .join("");
@@ -35,9 +39,9 @@ export async function GET() {
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0">
   <channel>
-    <title>AI 每日资讯 - 全球 AI 动态聚合</title>
+    <title>AI 日报 - 中文 AI 产品与行业资讯</title>
     <link>${base}</link>
-    <description>自动聚合全球 AI 领域的新闻、论文、产品发布与官方动态</description>
+    <description>聚合中文 AI 产品、行业与应用资讯，保留原始出处并提供阅读摘要。</description>
     <language>zh-CN</language>
     <lastBuildDate>${now}</lastBuildDate>
     ${itemsXml}
