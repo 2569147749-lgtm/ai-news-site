@@ -58,3 +58,23 @@ test("decodes a percent-encoded news route id before lookup", () => {
     "huxiu-ai-title人工智能"
   );
 });
+
+test("deduplicates the retained cache after a source changes an article id", () => {
+  const newer = {
+    ...makeItem("infoq-new-id"),
+    title: "Read, Don't Write: 重塑大模型评价体系",
+    link: "https://www.infoq.cn/article/example?utm_source=rss",
+    publishedAt: "2026-09-13T10:00:00.000Z",
+  };
+  const older = {
+    ...newer,
+    id: "infoq-old-id",
+    link: "https://www.infoq.cn/article/example",
+    fetchedAt: "2026-09-13T09:00:00.000Z",
+  };
+
+  const retained = retainNewsItems([newer], [older], NEWS_RETENTION_LIMIT);
+
+  assert.equal(retained.length, 1);
+  assert.equal(retained[0].id, "infoq-new-id");
+});

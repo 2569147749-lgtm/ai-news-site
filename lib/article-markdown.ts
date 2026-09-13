@@ -248,6 +248,9 @@ export function htmlToArticleMarkdown(html: string, baseUrl: string) {
     }
 
     if (tagName === "blockquote") {
+      if (node.find("p, li, ul, ol, h1, h2, h3, h4").length > 0) {
+        return;
+      }
       blocks.push(`> ${formattedText || text}`);
       return;
     }
@@ -259,6 +262,7 @@ export function htmlToArticleMarkdown(html: string, baseUrl: string) {
     }
 
     if (tagName === "p") {
+      if (node.parent().is("li")) return;
       blocks.push(formattedText || text);
     }
 

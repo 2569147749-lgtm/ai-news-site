@@ -33,7 +33,9 @@ export default function NewsCard({
   return (
     <Link
       href={`/news/${item.id}`}
-      className={`feed-card ${featured ? "feed-card-featured" : ""}`}
+      className={`feed-card ${featured ? "feed-card-featured" : ""} ${
+        coverImage ? "feed-card-with-image" : "feed-card-text-only"
+      }`}
     >
       <div className="feed-card-copy">
         <div className="flex flex-wrap items-center gap-2 text-xs">

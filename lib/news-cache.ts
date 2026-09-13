@@ -1,4 +1,5 @@
 import type { NewsItem } from "./types";
+import { dedupeNewsItems } from "./news-dedupe";
 
 export const NEWS_RETENTION_LIMIT = 500;
 
@@ -23,7 +24,7 @@ export function retainNewsItems(
     }
   }
 
-  return [...byId.values()]
+  return dedupeNewsItems([...byId.values()])
     .sort((a, b) => {
       const aTimestamp = Date.parse(a.publishedAt) || Date.parse(a.fetchedAt) || 0;
       const bTimestamp = Date.parse(b.publishedAt) || Date.parse(b.fetchedAt) || 0;

@@ -7,6 +7,7 @@ import {
   saveNews as kvSave,
 } from "./kv";
 import { isValidDate } from "./news-date";
+import { dedupeNewsItems } from "./news-dedupe";
 import {
   decodeNewsId,
   NEWS_RETENTION_LIMIT,
@@ -100,7 +101,7 @@ export async function getNewsWithFallback(): Promise<NewsItem[]> {
   try {
     const kvItems = await kvGetAll();
     if (kvItems && kvItems.length > 0) {
-      const sorted = sortByDateDesc(kvItems);
+      const sorted = dedupeNewsItems(sortByDateDesc(kvItems));
 
       // 更新内存缓存
       setMemCache({

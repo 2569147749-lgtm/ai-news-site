@@ -189,6 +189,19 @@
     flex-direction: column;
   }
 
+  .feed-card-text-only {
+    display: block;
+  }
+
+  .feed-card-text-only .feed-card-copy {
+    width: 100%;
+  }
+
+  .feed-card-text-only .feed-card-title,
+  .feed-card-text-only .feed-card-summary {
+    max-width: none;
+  }
+
   .feed-card-title {
     color: #242424;
     display: -webkit-box;

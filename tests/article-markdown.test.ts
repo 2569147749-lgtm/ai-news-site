@@ -162,6 +162,30 @@ test("retains inline emphasis, links, ordered steps, and section dividers", () =
   assert.match(markdown, /---/);
 });
 
+test("keeps nested quote outlines structured without emitting a flattened duplicate", () => {
+  const markdown = htmlToArticleMarkdown(
+    `
+      <article>
+        <blockquote>
+          <p><strong>演讲提纲：</strong></p>
+          <ol><li><p>行业趋势与评测困境</p></li></ol>
+          <ul><li><p>传统生成式 Judge 的三大“税”</p></li></ul>
+          <p>2. BoRP 技术架构：从“读”取代“写”</p>
+          <ul><li><p>提取纯净的满意度信号。</p></li></ul>
+        </blockquote>
+      </article>
+    `,
+    "https://example.com/article"
+  );
+
+  assert.match(markdown, /\*\*演讲提纲：\*\*/);
+  assert.match(markdown, /1\. 行业趋势与评测困境/);
+  assert.match(markdown, /- 传统生成式 Judge 的三大“税”/);
+  assert.match(markdown, /2\. BoRP 技术架构：从“读”取代“写”/);
+  assert.equal((markdown.match(/演讲提纲/g) || []).length, 1);
+  assert.equal((markdown.match(/传统生成式 Judge/g) || []).length, 1);
+});
+
 test("skips a paragraph that duplicates text embedded in the preceding image", () => {
   const markdown = htmlToArticleMarkdown(
     `

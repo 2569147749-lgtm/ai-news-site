@@ -10,6 +10,7 @@ import {
 } from "@/lib/article-format";
 import { getNewsItemById, getNewsWithFallback } from "@/lib/data";
 import { getShanghaiDate } from "@/lib/news-date";
+import { cleanNewsSummary } from "@/lib/news-summary";
 
 interface Props {
   params: { slug: string };
@@ -149,8 +150,8 @@ export async function generateMetadata({ params }: Props) {
   const item = await getNewsItemById(params.slug);
   if (!item) return { title: "未找到 · Aura Daily" };
   return {
-    title: `${item.title} · Aura Daily`,
-    description: item.summary,
+    title: `${cleanNewsSummary(item.title)} · Aura Daily`,
+    description: cleanNewsSummary(item.summary),
     keywords: item.tags,
   };
 }
@@ -159,6 +160,7 @@ export async function generateMetadata({ params }: Props) {
 export default async function NewsDetailPage({ params }: Props) {
   const item = await getNewsItemById(params.slug);
   if (!item) notFound();
+  const title = cleanNewsSummary(item.title);
   const attribution = getArticleAttribution(
     `${item.content || ""}\n${item.summary || ""}`,
     item.source
@@ -179,7 +181,7 @@ export default async function NewsDetailPage({ params }: Props) {
             className="mb-3 text-2xl font-extrabold leading-tight text-ink-main md:text-4xl"
             style={{ textWrap: "balance" }}
           >
-            {item.title}
+            {title}
           </h1>
 
           <p className="article-attribution mb-10">
