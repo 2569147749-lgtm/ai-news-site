@@ -7,6 +7,11 @@ const ALLOWED_MEDIA_HOST_SUFFIXES = [
   "36kr.com",
   "pingwest.com",
   "byteimg.com",
+  "geekbang.org",
+  "ifanr.com",
+  "sspai.com",
+  "ithome.com",
+  "toutiaoimg.com",
 ];
 
 export function isAllowedMediaUrl(value: string) {

@@ -38,6 +38,9 @@ export function getSourceArticleSelectors(url: string) {
   if (host === "geekpark.net") {
     return [".article-content", ".articleContent", "article"];
   }
+  if (host === "infoq.cn") {
+    return [".ProseMirror", "article"];
+  }
 
   return [];
 }
@@ -175,6 +178,7 @@ async function extractWithCheerio(
     $("article, main, .post, .article, .content, .entry, .story, div, section").each(
       (_, elem) => {
         const $el = $(elem);
+        if ($el.is("html, body, #__nuxt")) return;
         const $ps = $el.find("p");
         const pCount = $ps.length;
         if (pCount < 3) return; // 段落太少，跳过

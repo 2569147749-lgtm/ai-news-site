@@ -11,4 +11,10 @@ test("uses source-specific article selectors before generic extraction", () => {
     getSourceArticleSelectors("https://www.huxiu.com/article/123.html"),
     [".article-content", "[class*='article-content']", "article"]
   );
+  assert.deepEqual(
+    getSourceArticleSelectors(
+      "https://www.infoq.cn/article/eS4M9XEPmLbkxksCyAye"
+    ),
+    [".ProseMirror", "article"]
+  );
 });
