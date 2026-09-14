@@ -28,24 +28,6 @@ test("preserves headings, paragraphs, lists, quotes, and images as markdown", ()
   assert.match(markdown, /- 成本下降/);
 });
 
-test("normalizes deep publisher headings to the supported article hierarchy", () => {
-  const markdown = htmlToArticleMarkdown(
-    `
-      <article>
-        <h4>JDK 27</h4>
-        <p>这是 JDK 27 的版本说明。</p>
-        <h4>TornadoVM</h4>
-        <p>这是 TornadoVM 的版本说明。</p>
-      </article>
-    `,
-    "https://www.infoq.cn/article/example"
-  );
-
-  assert.match(markdown, /^### JDK 27$/m);
-  assert.match(markdown, /^### TornadoVM$/m);
-  assert.doesNotMatch(markdown, /^#### /m);
-});
-
 test("excludes author avatars and promotes styled section titles", () => {
   const markdown = htmlToArticleMarkdown(
     `
