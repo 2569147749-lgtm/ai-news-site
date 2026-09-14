@@ -4,6 +4,10 @@ import { join } from "node:path";
 import test from "node:test";
 
 const styles = readFileSync(join(process.cwd(), "app/globals.css"), "utf8");
+const articlePage = readFileSync(
+  join(process.cwd(), "app/news/[slug]/page.tsx"),
+  "utf8"
+);
 
 test("keeps news headings on natural line wrapping", () => {
   assert.match(styles, /h3\s*\{\s*text-wrap:\s*wrap;/);
@@ -23,4 +27,13 @@ test("keeps the trending spotlight free of surrounding divider lines", () => {
 
   assert.ok(trendingSection?.groups?.rules);
   assert.doesNotMatch(trendingSection.groups.rules, /border-(top|bottom)/);
+});
+
+test("uses one natural-wrap title style for every article source", () => {
+  assert.match(articlePage, /className="article-title\b/);
+  assert.doesNotMatch(articlePage, /textWrap:\s*"balance"/);
+  assert.match(
+    styles,
+    /\.article-title\s*\{[^}]*text-wrap:\s*wrap;[^}]*\}/s
+  );
 });

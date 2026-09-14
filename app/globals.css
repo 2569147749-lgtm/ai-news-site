@@ -479,6 +479,11 @@
     margin: 0 auto;
   }
 
+  .article-title {
+    max-width: 100%;
+    text-wrap: wrap;
+  }
+
   .article-attribution {
     color: #9a9a9a;
     font-size: 0.82rem;

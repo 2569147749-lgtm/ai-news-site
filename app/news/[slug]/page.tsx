@@ -178,8 +178,7 @@ export default async function NewsDetailPage({ params }: Props) {
         <article>
           {/* 标题 — 立刻渲染 */}
           <h1
-            className="mb-3 text-2xl font-extrabold leading-tight text-ink-main md:text-4xl"
-            style={{ textWrap: "balance" }}
+            className="article-title mb-3 text-2xl font-extrabold leading-tight text-ink-main md:text-4xl"
           >
             {title}
           </h1>
