@@ -1,0 +1,11 @@
+node_modules
+.next
+.git
+.vercel
+.trae
+.presentation-previews
+deliverables
+coverage
+.env*
+*.log
+.DS_Store
