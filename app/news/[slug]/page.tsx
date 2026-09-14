@@ -167,7 +167,7 @@ export default async function NewsDetailPage({ params }: Props) {
   );
 
   return (
-    <div className="site-shell max-w-4xl py-8 md:py-12">
+    <div className="site-shell py-8 md:py-12">
         <Link
           href="/"
           className="mb-7 inline-flex text-sm text-ink-sub hover:text-ink-main"
@@ -179,7 +179,7 @@ export default async function NewsDetailPage({ params }: Props) {
           {/* 标题 — 立刻渲染 */}
           <h1
             className="mb-3 text-2xl font-extrabold leading-tight text-ink-main md:text-4xl"
-            style={{ textWrap: "balance" }}
+            style={{ textWrap: "wrap" }}
           >
             {title}
           </h1>

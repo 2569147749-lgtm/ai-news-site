@@ -243,7 +243,10 @@ export function htmlToArticleMarkdown(html: string, baseUrl: string) {
 
     if (/^h[1-4]$/.test(tagName) || isStyledHeading(node, text)) {
       const level = Number(tagName.slice(1));
-      blocks.push(`${"#".repeat(Math.min(Math.max(level + 1, 2), 4))} ${text}`);
+      const articleLevel = Number.isFinite(level)
+        ? Math.min(Math.max(level + 1, 2), 3)
+        : 2;
+      blocks.push(`${"#".repeat(articleLevel)} ${text}`);
       return;
     }
 
