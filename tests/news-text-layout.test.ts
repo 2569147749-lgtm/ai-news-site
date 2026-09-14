@@ -15,3 +15,12 @@ test("lets the trending text use the full spotlight width", () => {
     /\.trending-carousel-content\s*\{[^}]*width:\s*100%;/s
   );
 });
+
+test("keeps the trending spotlight free of surrounding divider lines", () => {
+  const trendingSection = styles.match(
+    /\.trending-carousel\s*\{(?<rules>[^}]*)\}/s
+  );
+
+  assert.ok(trendingSection?.groups?.rules);
+  assert.doesNotMatch(trendingSection.groups.rules, /border-(top|bottom)/);
+});
