@@ -185,6 +185,10 @@
     color: #3157c8;
   }
 
+  .feed-card-with-image {
+    height: 172px;
+  }
+
   .feed-card-copy {
     display: flex;
     min-width: 0;
@@ -275,8 +279,9 @@
 
   .feed-card-thumb {
     width: 124px;
+    height: 140px;
     flex: 0 0 124px;
-    align-self: stretch;
+    align-self: center;
     overflow: hidden;
     border-radius: 6px;
     background: #f3f3f3;
