@@ -18,7 +18,23 @@ test("provides a standalone Docker image for CloudBase Cloud Run", () => {
 
   const dockerfile = readFileSync(dockerfilePath, "utf8");
 
-  assert.match(dockerfile, /node:20-alpine/);
+  assert.match(dockerfile, /node:20-bookworm-slim/);
+  assert.doesNotMatch(dockerfile, /node:20-alpine/);
+  assert.match(dockerfile, /apt-get install -y --no-install-recommends/);
+  for (const packageName of [
+    "python3",
+    "make",
+    "g++",
+    "pkg-config",
+    "libcairo2-dev",
+    "libpango1.0-dev",
+    "libjpeg-dev",
+    "libgif-dev",
+    "librsvg2-dev",
+  ]) {
+    const escapedName = packageName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    assert.match(dockerfile, new RegExp(escapedName));
+  }
   assert.match(dockerfile, /npm ci/);
   assert.match(dockerfile, /COPY --from=builder .*\.next\/standalone/);
   assert.match(dockerfile, /COPY --from=builder .*\.next\/static/);
