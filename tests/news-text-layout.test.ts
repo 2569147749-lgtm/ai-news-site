@@ -38,11 +38,17 @@ test("uses one natural-wrap title style for every article source", () => {
   );
 });
 
-test("uses bounded preview media without letting portrait images stretch feed cards", () => {
+test("uses bounded preview media without clipping feed card text", () => {
   assert.match(
     styles,
-    /\.feed-card-with-image\s*\{[^}]*height:\s*172px;[^}]*\}/s
+    /\.feed-card-with-image\s*\{(?<rules>[^}]*)\}/s
   );
+  const cardRules = styles.match(
+    /\.feed-card-with-image\s*\{(?<rules>[^}]*)\}/s
+  )?.groups?.rules;
+  assert.ok(cardRules);
+  assert.match(cardRules, /min-height:\s*216px;/);
+  assert.doesNotMatch(cardRules, /(?:^|\s)height:\s*172px;/);
   assert.match(
     styles,
     /\.feed-card-thumb\s*\{[^}]*height:\s*140px;[^}]*\}/s

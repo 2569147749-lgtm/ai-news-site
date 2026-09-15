@@ -186,7 +186,7 @@
   }
 
   .feed-card-with-image {
-    height: 172px;
+    min-height: 216px;
   }
 
   .feed-card-copy {
@@ -252,7 +252,8 @@
     display: flex;
     align-items: center;
     gap: 0.6rem;
-    margin-top: 0.9rem;
+    margin-top: auto;
+    padding-top: 0.9rem;
     color: #999999;
     font-size: 0.75rem;
     font-variant-numeric: tabular-nums;
