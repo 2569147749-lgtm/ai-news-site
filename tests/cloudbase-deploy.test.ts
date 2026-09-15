@@ -36,6 +36,7 @@ test("provides a standalone Docker image for CloudBase Cloud Run", () => {
     assert.match(dockerfile, new RegExp(escapedName));
   }
   assert.match(dockerfile, /npm ci/);
+  assert.match(dockerfile, /RUN mkdir -p public/);
   assert.match(dockerfile, /COPY --from=builder .*\.next\/standalone/);
   assert.match(dockerfile, /COPY --from=builder .*\.next\/static/);
   assert.match(dockerfile, /ENV PORT=3000/);
